@@ -1,0 +1,4 @@
+# Note: this is not a multi-arch image
+# and won't run on your Raspberry Pi
+image: alexellis2/cows:latest
+name: cows
