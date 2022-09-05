@@ -1,0 +1,4 @@
+name: checker
+image: ghcr.io/openfaas/config-checker:latest
+namespace: openfaas
+service_account: openfaas-checker

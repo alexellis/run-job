@@ -24,8 +24,8 @@ import (
 	"k8s.io/client-go/tools/cache"
 	watchtools "k8s.io/client-go/tools/watch"
 
+	yaml "gopkg.in/yaml.v2"
 	"k8s.io/client-go/rest"
-
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -34,29 +34,57 @@ var (
 	GitCommit string
 )
 
+type Job struct {
+	JobName        string `yaml:"name"`
+	Image          string `yaml:"image"`
+	Namespace      string `yaml:"namespace"`
+	ServiceAccount string `yaml:"service_account,omitempty"`
+}
+
 func main() {
 
 	var (
 		kubeconfig string
-		namespace  string
-		name       string
-		sa         string
-		image      string
 		outFile    string
+		file       string
 	)
 
-	flag.StringVar(&namespace, "namespace", "default", "Namespace for the job")
-	flag.StringVar(&name, "name", "job1", "Name of the job")
-	flag.StringVar(&sa, "sa", "", "Service account to use for the job")
-	flag.StringVar(&image, "image", "", "Image for the job")
 	flag.StringVar(&outFile, "out", "", "File to write to or leave blank for STDOUT")
-
 	flag.StringVar(&kubeconfig, "kubeconfig", "$HOME/.kube/config", "Path to KUBECONFIG")
+	flag.StringVar(&file, "f", "", "Job to run or leave blank for job.yaml in current directory")
 	flag.Parse()
+
+	if len(file) == 0 {
+		if stat, err := os.Stat("./job.yaml"); err != nil {
+			log.Fatal("specify a job file with -f or provide a job file called job.yaml in this directory")
+		} else {
+			file = stat.Name()
+		}
+	}
+
+	jobFile := Job{}
+	data, err := os.ReadFile(file)
+	if err != nil {
+		log.Fatalf("error reading job file %s %s", file, err.Error())
+	}
+	err = yaml.Unmarshal(data, &jobFile)
+	if err != nil {
+		log.Fatalf("error parsing job file %s %s", file, err.Error())
+	}
+
+	name := jobFile.JobName
+	image := jobFile.Image
+	namespace := jobFile.Namespace
+	sa := jobFile.ServiceAccount
+
+	if len(namespace) == 0 {
+		namespace = "default"
+	}
 
 	if len(name) == 0 {
 		log.Fatalf("--job is required")
 	}
+
 	if len(image) == 0 {
 		log.Fatalf("--image is required")
 	}
@@ -66,7 +94,17 @@ func main() {
 		panic(err)
 	}
 
-	u := uuid.New()
+	if len(sa) > 0 {
+		if _, err := clientset.CoreV1().
+			ServiceAccounts(namespace).
+			Get(context.Background(), sa, metav1.GetOptions{}); err != nil {
+			if apierrors.IsNotFound(err) {
+				log.Fatalf("service account %s not found in namespace %s", sa, namespace)
+			}
+		}
+	}
+
+	jobID := uuid.New().String()
 
 	parallelism := int32(1)
 	ctx := context.Background()
@@ -76,7 +114,7 @@ func main() {
 			Namespace: namespace,
 			Labels: map[string]string{
 				"app":    "run-job",
-				"job-id": u.String(),
+				"job-id": jobID,
 			},
 		},
 		Spec: batchv1.JobSpec{
@@ -86,7 +124,7 @@ func main() {
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						"app":    "run-job",
-						"job-id": u.String(),
+						"job-id": jobID,
 					},
 					Name:      name,
 					Namespace: namespace,
@@ -106,15 +144,17 @@ func main() {
 		},
 	}
 
-	job, err := clientset.BatchV1().Jobs(namespace).Create(ctx, jobSpec, metav1.CreateOptions{})
+	job, err := clientset.BatchV1().
+		Jobs(namespace).
+		Create(ctx, jobSpec, metav1.CreateOptions{})
 
 	if err != nil {
 		log.Fatalf("Error creating job: %v", err)
 	}
 
-	fmt.Printf("Created job %q (%s)\n", job.GetName(), u.String())
+	fmt.Printf("Created job %s.%s (%s)\n", job.GetName(), job.GetNamespace(), jobID)
 
-	if err := watchForJob(clientset, ctx, u.String(), job.GetName(), job.Namespace, outFile); err != nil {
+	if err := watchForJob(clientset, ctx, jobID, job.GetName(), job.Namespace, outFile); err != nil {
 		log.Fatalf("Error watching job: %v", err)
 	}
 }
@@ -179,9 +219,9 @@ func watchForJob(clientset *kubernetes.Clientset, ctx context.Context, jobID, na
 
 			if done {
 				if failed {
-					fmt.Printf("\nJob %s (%s) failed %s\n", name, jobID, message)
+					fmt.Printf("\nJob %s.%s (%s) failed %s\n", name, namespace, jobID, message)
 				} else {
-					fmt.Printf("\nJob %s (%s) succeeded %s\n", name, jobID, message)
+					fmt.Printf("\nJob %s.%s (%s) succeeded %s\n", name, namespace, jobID, message)
 				}
 
 				pods, err := clientset.CoreV1().Pods(namespace).List(wCtx, listOptions)
@@ -197,20 +237,21 @@ func watchForJob(clientset *kubernetes.Clientset, ctx context.Context, jobID, na
 					}
 					logsOut = "Recorded: " + time.Now().UTC().String() + "\n\n" + logsOut
 
-					if len(outFile) > 0 {
-						if err := ioutil.WriteFile(outFile, []byte(logsOut), os.ModePerm); err != nil {
-							log.Fatalf("Error writing logs to file: %v", err)
-						} else {
-							log.Println("Logs written to file", outFile)
-						}
-					} else {
-						fmt.Printf("\n%s\n", logsOut)
-					}
 					deletePol := metav1.DeletePropagationBackground
 					if err := clientset.BatchV1().Jobs(namespace).Delete(wCtx, name, metav1.DeleteOptions{PropagationPolicy: &deletePol}); err != nil {
 						log.Fatalf("Error deleting job: %v", err)
 					} else {
 						fmt.Printf("Deleted job %s\n", name)
+					}
+
+					if len(outFile) > 0 {
+						if err := ioutil.WriteFile(outFile, []byte(logsOut), os.ModePerm); err != nil {
+							log.Fatalf("Error writing logs to file: %v", err)
+						} else {
+							fmt.Printf("Logs written to: %s", outFile)
+						}
+					} else {
+						fmt.Printf("\n%s\n", logsOut)
 					}
 
 				} else {

@@ -6,12 +6,17 @@ Creates a Kubernetes Job, waits until it's completed due to success or failure, 
 
 ## Example:
 
-```bash
-go run . \ 
-    --image ghcr.io/openfaas/config-checker:latest \
-    --name checker \
-    --namespace openfaas \
-    --sa openfaas-checker \
-    -out report.txt
+Create a `job.yaml` file:
 
+```yaml
+name: checker
+image: ghcr.io/openfaas/config-checker:latest
+namespace: openfaas
+sa: openfaas-checker
+```
+
+```bash
+run-job \
+    -f job.yaml \
+    -out report.txt
 ```
