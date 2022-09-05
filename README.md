@@ -10,7 +10,7 @@ run-job 🏃‍♂️ does the following with a simple YAML file definition:
 
 It's primary usecase is for [checking OpenFaaS installations for customers](https://github.com/openfaas/config-checker) where it requires a service account to access various resources in a controlled way.
 
-## Example
+## Example 1 - a customer diagnostics tool with a service account
 
 Create a `job.yaml` file:
 
@@ -33,6 +33,30 @@ Then start the job defined in `job.yaml` and export the logs to a `report.txt` f
 run-job \
     -f job.yaml \
     -out report.txt
+```
+
+## Example 2 - light relief with ASCII cows
+
+cows.yaml:
+
+```yaml
+image: alexellis2/cows:latest
+name: cows
+```
+
+Run the job:
+
+```bash
+run-job -f cows.yaml
+
+        ()  ()
+         ()()
+         (oo)
+  /-------UU
+ / |     ||
+*  ||w---||
+   ^^    ^^
+Eh, What's up Doc?
 ```
 
 ## Why does this tool exist?
