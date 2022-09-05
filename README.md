@@ -107,7 +107,7 @@ Running a Job in Kubernetes is confusing:
 Inspired by:
 
 * [alexellis/jaas](https://github.com/alexellis/jaas) built in 2017, now deprecated for running jobs on Docker Swarm 
-* Also [stefanprodan/kjob](https://github.com/stefanprodan/kjob) by Stefan Prodan, now unmaintained for 3 years
+* [stefanprodan/kjob](https://github.com/stefanprodan/kjob) by Stefan Prodan, now unmaintained for 3 years
 
 ## Can I get a new option / field / feature?
 
