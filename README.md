@@ -41,7 +41,8 @@ cows.yaml:
 
 ```yaml
 $ cat <<EOF > cows.yaml
-image: alexellis2/cows:latest
+# Multi-arch image for arm64, amd64 and armv7l
+image: alexellis2/cows:2022-09-05-1955
 name: cows
 EOF
 ```
