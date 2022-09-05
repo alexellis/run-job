@@ -1,0 +1,4 @@
+name: get-nodes
+image: alexellis2/kubectl:2022-09-05-2243
+namespace: default
+service_account: kubectl-run-job

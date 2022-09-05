@@ -10,7 +10,15 @@ run-job 🏃‍♂️ does the following with a simple YAML file definition:
 
 It's primary usecase is for [checking OpenFaaS installations for customers](https://github.com/openfaas/config-checker) where it requires a service account to access various resources in a controlled way.
 
-## Example 1 - a customer diagnostics tool with a service account
+## Examples
+
+The first example is a real-world job for OpenFaaS customers, you probably won't run this example yourself, but read over it to learn the syntax and options. Then feel free to try Example 2 and 3, which anyone should be able to run.
+
+The `image:` field in the Job YAML is for a container image that can be pulled by the cluster.
+
+> Note: the examples in this repo are built with the `faas-cli publish` command because it can create multi-arch container images that work on PCs and ARM devices. You can build your images however you like, or by manually typing in various buildx commands for multi-arch.
+
+### Example 1 - a customer diagnostics tool with a service account
 
 Create a `job.yaml` file:
 
@@ -35,7 +43,32 @@ $ run-job \
     -out report.txt
 ```
 
-## Example 2 - light relief with ASCII cows
+### Example 2 - kubectl with RBAC
+
+In order to access the K8s API, [an RBAC file](/examples/kubectl/rbac.yaml) is required along with a `serviceAccount` field in the job YAML.
+
+The command `kubectl get nodes -o wide` is hard-coded in the [Dockerfile](/examples/kubectl/Dockerfile), however, in a future version, you'll be able to set this [in the job's YAML file instead](/examples/kubectl/kubectl_get_nodes_job.yaml).
+
+```bash
+$ kubectl apply ./examples/kubectl/rbac.yaml
+$ run-job -f ./examples/kubectl/kubectl_get_nodes_job.yaml
+
+Created job get-nodes.default (4097ed06-9422-41c2-86ac-6d4a447d10ab)
+....
+Job get-nodes.default (4097ed06-9422-41c2-86ac-6d4a447d10ab) succeeded 
+Deleted job get-nodes
+
+Recorded: 2022-09-05 21:43:57.875629 +0000 UTC
+
+NAME           STATUS   ROLES                       AGE   VERSION        INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION   CONTAINER-RUNTIME
+k3s-server-1   Ready    control-plane,etcd,master   25h   v1.24.4+k3s1   192.168.2.1   <none>        Raspbian GNU/Linux 10 (buster)   5.10.103-v7l+      containerd://1.6.6-k3s1
+k3s-server-2   Ready    control-plane,etcd,master   25h   v1.24.4+k3s1   192.168.2.2   <none>        Raspbian GNU/Linux 10 (buster)   5.10.103-v7l+      containerd://1.6.6-k3s1
+k3s-server-3   Ready    control-plane,etcd,master   25h   v1.24.4+k3s1   192.168.2.3   <none>        Raspbian GNU/Linux 10 (buster)   5.10.103-v7l+    containerd://1.6.6-k3s1
+```
+
+### Example 3 - light relief with ASCII cows
+
+See also: [examples/cows/Dockerfile](/examples/cows/Dockerfile)
 
 cows.yaml:
 

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubectl-run-job
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: run-job
+  name: kubectl-run-job
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: run-job
+  name: kubectl-run-job
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubectl-run-job
+subjects:  
+  - kind: ServiceAccount
+    name: kubectl-run-job
+    namespace: default
+---
