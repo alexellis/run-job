@@ -1,8 +1,8 @@
-## run-job
+## run-job 🏃‍♂️ 
 
 The easiest way to run a simple one-shot job on Kubernetes.
 
-run-job does the following with a simple YAML file definition:
+run-job 🏃‍♂️ does the following with a simple YAML file definition:
 * Creates a Kubernetes Job
 * Watches until it passes or fails
 * Collects its logs (if available)
