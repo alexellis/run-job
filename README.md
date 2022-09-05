@@ -21,7 +21,13 @@ namespace: openfaas
 sa: openfaas-checker
 ```
 
-Run the job and export the logs to a report.txt file:
+Download run-job from [the releases page](https://github.com/alexellis/run-job/releases), or use arkade:
+
+```bash
+arkade get run-job
+```
+
+Then start the job defined in `job.yaml` and export the logs to a `report.txt` file:
 
 ```bash
 run-job \
