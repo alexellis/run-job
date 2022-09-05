@@ -29,6 +29,11 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+var (
+	Version   string
+	GitCommit string
+)
+
 func main() {
 
 	var (
@@ -51,6 +56,9 @@ func main() {
 
 	if len(name) == 0 {
 		log.Fatalf("--job is required")
+	}
+	if len(image) == 0 {
+		log.Fatalf("--image is required")
 	}
 
 	clientset, err := getClientset(kubeconfig)
