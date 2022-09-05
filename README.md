@@ -24,13 +24,13 @@ sa: openfaas-checker
 Download run-job from [the releases page](https://github.com/alexellis/run-job/releases), or use arkade:
 
 ```bash
-arkade get run-job
+$ arkade get run-job
 ```
 
 Then start the job defined in `job.yaml` and export the logs to a `report.txt` file:
 
 ```bash
-run-job \
+$ run-job \
     -f job.yaml \
     -out report.txt
 ```
@@ -40,14 +40,16 @@ run-job \
 cows.yaml:
 
 ```yaml
+$ cat <<EOF > cows.yaml
 image: alexellis2/cows:latest
 name: cows
+EOF
 ```
 
 Run the job:
 
 ```bash
-run-job -f cows.yaml
+$ run-job -f cows.yaml
 
         ()  ()
          ()()
