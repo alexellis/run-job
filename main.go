@@ -35,10 +35,12 @@ var (
 )
 
 type Job struct {
-	JobName        string `yaml:"name"`
-	Image          string `yaml:"image"`
-	Namespace      string `yaml:"namespace"`
-	ServiceAccount string `yaml:"service_account,omitempty"`
+	JobName        string   `yaml:"name"`
+	Image          string   `yaml:"image"`
+	Namespace      string   `yaml:"namespace,omitempty"`
+	ServiceAccount string   `yaml:"service_account,omitempty"`
+	Command        []string `yaml:"command,omitempty"`
+	Args           []string `yaml:"args,omitempty"`
 }
 
 func main() {
@@ -76,6 +78,8 @@ func main() {
 	image := jobFile.Image
 	namespace := jobFile.Namespace
 	sa := jobFile.ServiceAccount
+	command := jobFile.Command
+	args := jobFile.Args
 
 	if len(namespace) == 0 {
 		namespace = "default"
@@ -137,6 +141,8 @@ func main() {
 							Image:           image,
 							Name:            name,
 							ImagePullPolicy: corev1.PullAlways,
+							Command:         command,
+							Args:            args,
 						},
 					},
 				},
