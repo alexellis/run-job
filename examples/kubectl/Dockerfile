@@ -18,4 +18,3 @@ USER app
 
 RUN arkade get kubectl@v1.24.1 --quiet
 
-CMD ["/home/app/.arkade/bin/kubectl", "get", "nodes", "-o", "wide"]
