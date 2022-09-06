@@ -1,4 +1,4 @@
-## run-job 🏃‍♂️ 
+## run-job 🏃‍♂️
 
 The easiest way to run a simple one-shot job on Kubernetes.
 
@@ -47,7 +47,7 @@ $ run-job \
 
 In order to access the K8s API, [an RBAC file](/examples/kubectl/rbac.yaml) is required along with a `serviceAccount` field in the job YAML.
 
-The command `kubectl get nodes -o wide` is hard-coded in the [Dockerfile](/examples/kubectl/Dockerfile), however, in a future version, you'll be able to set this [in the job's YAML file instead](/examples/kubectl/kubectl_get_nodes_job.yaml).
+The command `kubectl get nodes -o wide` configured [in the job's YAML file](/examples/kubectl/kubectl_get_nodes_job.yaml).
 
 ```bash
 $ kubectl apply ./examples/kubectl/rbac.yaml
@@ -55,7 +55,7 @@ $ run-job -f ./examples/kubectl/kubectl_get_nodes_job.yaml
 
 Created job get-nodes.default (4097ed06-9422-41c2-86ac-6d4a447d10ab)
 ....
-Job get-nodes.default (4097ed06-9422-41c2-86ac-6d4a447d10ab) succeeded 
+Job get-nodes.default (4097ed06-9422-41c2-86ac-6d4a447d10ab) succeeded
 Deleted job get-nodes
 
 Recorded: 2022-09-05 21:43:57.875629 +0000 UTC
@@ -106,7 +106,7 @@ Running a Job in Kubernetes is confusing:
 
 Inspired by:
 
-* [alexellis/jaas](https://github.com/alexellis/jaas) built in 2017, now deprecated for running jobs on Docker Swarm 
+* [alexellis/jaas](https://github.com/alexellis/jaas) built in 2017, now deprecated for running jobs on Docker Swarm
 * [stefanprodan/kjob](https://github.com/stefanprodan/kjob) by Stefan Prodan, now unmaintained for 3 years
 
 ## Can I get a new option / field / feature?
