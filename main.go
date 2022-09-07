@@ -34,13 +34,29 @@ var (
 	GitCommit string
 )
 
+type Variable struct {
+	Name  string `yaml:"name"`
+	Value string `yaml:"value"`
+}
+
+type EnvFromConfigmap struct {
+	Name string
+}
+
+type EnvFromSecret struct {
+	Name string
+}
+
 type Job struct {
-	JobName        string   `yaml:"name"`
-	Image          string   `yaml:"image"`
-	Namespace      string   `yaml:"namespace,omitempty"`
-	ServiceAccount string   `yaml:"service_account,omitempty"`
-	Command        []string `yaml:"command,omitempty"`
-	Args           []string `yaml:"args,omitempty"`
+	JobName          string             `yaml:"name"`
+	Image            string             `yaml:"image"`
+	Namespace        string             `yaml:"namespace,omitempty"`
+	ServiceAccount   string             `yaml:"service_account,omitempty"`
+	Command          []string           `yaml:"command,omitempty"`
+	Args             []string           `yaml:"args,omitempty"`
+	Env              []Variable         `yaml:"env,omitempty"`
+	EnvFromConfigmap []EnvFromConfigmap `yaml:"envFromConfigmap,omitempty"`
+	EnvFromSecret    []EnvFromSecret    `yaml:"envFromSecret,omitempty"`
 }
 
 func main() {
@@ -80,6 +96,14 @@ func main() {
 	sa := jobFile.ServiceAccount
 	command := jobFile.Command
 	args := jobFile.Args
+	rawEnv := jobFile.Env
+	rawEnvFromConfigmap := jobFile.EnvFromConfigmap
+	rawEnvFromSecret := jobFile.EnvFromSecret
+
+	env := []corev1.EnvVar{}
+	for _, v := range rawEnv {
+		env = append(env, corev1.EnvVar{Name: v.Name, Value: v.Value})
+	}
 
 	if len(namespace) == 0 {
 		namespace = "default"
@@ -106,6 +130,37 @@ func main() {
 				log.Fatalf("service account %s not found in namespace %s", sa, namespace)
 			}
 		}
+	}
+
+	envFrom := []corev1.EnvFromSource{}
+	for _, v := range rawEnvFromConfigmap {
+		if _, err := clientset.CoreV1().
+			ConfigMaps(namespace).
+			Get(context.Background(), v.Name, metav1.GetOptions{}); err != nil {
+			if apierrors.IsNotFound(err) {
+				log.Fatalf("configmap %s not found in namespace %s", v.Name, namespace)
+			}
+		}
+		envFrom = append(envFrom, corev1.EnvFromSource{ConfigMapRef: &corev1.ConfigMapEnvSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: v.Name,
+			},
+		}})
+	}
+
+	for _, v := range rawEnvFromSecret {
+		if _, err := clientset.CoreV1().
+			Secrets(namespace).
+			Get(context.Background(), v.Name, metav1.GetOptions{}); err != nil {
+			if apierrors.IsNotFound(err) {
+				log.Fatalf("secret %s not found in namespace %s", v.Name, namespace)
+			}
+		}
+		envFrom = append(envFrom, corev1.EnvFromSource{SecretRef: &corev1.SecretEnvSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: v.Name,
+			},
+		}})
 	}
 
 	jobID := uuid.New().String()
@@ -143,6 +198,8 @@ func main() {
 							ImagePullPolicy: corev1.PullAlways,
 							Command:         command,
 							Args:            args,
+							Env:             env,
+							EnvFrom:         envFrom,
 						},
 					},
 				},
