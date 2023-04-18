@@ -1,5 +1,9 @@
 ## run-job 🏃‍♂️
 
+[![Github All Releases](https://img.shields.io/github/downloads/alexellis/run-job/total.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![build](https://github.com/alexellis/run-job/actions/workflows/build.yml/badge.svg)](https://github.com/alexellis/run-job/actions/workflows/build.yml)
+
 The easiest way to run a simple one-shot job on Kubernetes.
 
 run-job 🏃‍♂️ does the following with a simple YAML file definition:
