@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.27.2
-	k8s.io/apimachinery v0.27.2
+	k8s.io/apimachinery v0.27.3
 	k8s.io/client-go v0.27.2
 )
 
