@@ -55,20 +55,21 @@ In order to access the K8s API, [an RBAC file](/examples/kubectl/rbac.yaml) is r
 The command `kubectl get nodes -o wide` configured [in the job's YAML file](/examples/kubectl/kubectl_get_nodes_job.yaml).
 
 ```bash
-$ kubectl apply ./examples/kubectl/rbac.yaml
+$ kubectl apply -f ./examples/kubectl/rbac.yaml
 $ run-job -f ./examples/kubectl/kubectl_get_nodes_job.yaml
 
-Created job get-nodes.default (4097ed06-9422-41c2-86ac-6d4a447d10ab)
-....
-Job get-nodes.default (4097ed06-9422-41c2-86ac-6d4a447d10ab) succeeded
+Created job get-nodes.default (e99686bf-2064-4659-8160-ec28b5d820f0)
+...
+Job get-nodes.default (e99686bf-2064-4659-8160-ec28b5d820f0) succeeded 
 Deleted job get-nodes
 
-Recorded: 2022-09-05 21:43:57.875629 +0000 UTC
+Recorded: 2023-10-20 12:44:37.097486774 +0000 UTC
 
-NAME           STATUS   ROLES                       AGE   VERSION        INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION   CONTAINER-RUNTIME
-k3s-server-1   Ready    control-plane,etcd,master   25h   v1.24.4+k3s1   192.168.2.1   <none>        Raspbian GNU/Linux 10 (buster)   5.10.103-v7l+      containerd://1.6.6-k3s1
-k3s-server-2   Ready    control-plane,etcd,master   25h   v1.24.4+k3s1   192.168.2.2   <none>        Raspbian GNU/Linux 10 (buster)   5.10.103-v7l+      containerd://1.6.6-k3s1
-k3s-server-3   Ready    control-plane,etcd,master   25h   v1.24.4+k3s1   192.168.2.3   <none>        Raspbian GNU/Linux 10 (buster)   5.10.103-v7l+    containerd://1.6.6-k3s1
+NAME           STATUS   ROLES                       AGE   VERSION        INTERNAL-IP   EXTERNAL-IP      OS-IMAGE             KERNEL-VERSION
+k3s-agent-1    Ready    <none>                      63d   v1.27.4+k3s1   192.168.3.4   101.58.106.152   Ubuntu 22.04.2 LTS   5.15.0-73-generic
+k3s-server-1   Ready    control-plane,etcd,master   71d   v1.27.4+k3s1   192.168.3.1   101.58.106.241   Ubuntu 22.04.2 LTS   5.15.0-73-generic
+k3s-server-2   Ready    control-plane,etcd,master   62d   v1.27.4+k3s1   192.168.3.2   101.58.106.122   Ubuntu 22.04.2 LTS   5.15.0-73-generic
+k3s-server-3   Ready    control-plane,etcd,master   62d   v1.27.4+k3s1   192.168.3.3   101.58.106.98    Ubuntu 22.04.2 LTS   5.15.0-73-generic
 ```
 
 ### Example 3 - light relief with ASCII cows
@@ -98,6 +99,12 @@ $ run-job -f cows.yaml
 *  ||w---||
    ^^    ^^
 Eh, What's up Doc?
+```
+
+Or run from the examples repo:
+
+```bash
+run-job -f ./examples/cows/cows_job.yaml
 ```
 
 ## Why does this tool exist?
