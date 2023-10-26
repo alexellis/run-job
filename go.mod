@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/davecgh/go-spew v1.1.1
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.4.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.28.3
 	k8s.io/apimachinery v0.28.3
