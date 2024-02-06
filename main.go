@@ -53,9 +53,10 @@ func main() {
 		outFile    string
 		file       string
 	)
+	kubeConfigDefault := getEnv("KUBECONFIG", "$HOME/.kube/config")
 
 	flag.StringVar(&outFile, "out", "", "File to write to or leave blank for STDOUT")
-	flag.StringVar(&kubeconfig, "kubeconfig", "$HOME/.kube/config", "Path to KUBECONFIG")
+	flag.StringVar(&kubeconfig, "kubeconfig", kubeConfigDefault, "Path to KUBECONFIG")
 	flag.StringVar(&file, "f", "", "Job to run or leave blank for job.yaml in current directory")
 	flag.Parse()
 
@@ -348,4 +349,11 @@ func logs(ctx context.Context, clientset *kubernetes.Clientset, pods []string, n
 	}
 
 	return buf.String(), nil
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
