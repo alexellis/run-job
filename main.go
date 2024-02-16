@@ -53,7 +53,7 @@ func main() {
 		outFile    string
 		file       string
 	)
-	kubeConfigDefault := getEnv("KUBECONFIG", "$HOME/.kube/config")
+	kubeConfigDefault := getEnv("KUBECONFIG", os.ExpandEnv("$HOME/.kube/config"))
 
 	flag.StringVar(&outFile, "out", "", "File to write to or leave blank for STDOUT")
 	flag.StringVar(&kubeconfig, "kubeconfig", kubeConfigDefault, "Path to KUBECONFIG")
