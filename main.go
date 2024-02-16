@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -54,10 +55,26 @@ func main() {
 		file       string
 	)
 
+	kubeConfigDefault := "$HOME/.kube/config"
 	flag.StringVar(&outFile, "out", "", "File to write to or leave blank for STDOUT")
 	flag.StringVar(&kubeconfig, "kubeconfig", "$HOME/.kube/config", "Path to KUBECONFIG")
 	flag.StringVar(&file, "f", "", "Job to run or leave blank for job.yaml in current directory")
 	flag.Parse()
+
+	// If there is no override for -kubeconfig, then check the environment for an override
+	if kubeconfig == kubeConfigDefault {
+		if v, ok := os.LookupEnv("KUBECONFIG"); ok && len(v) > 0 {
+			kubeconfig = v
+		}
+	}
+
+	// Windows requires %HOMEPATH% instead of $HOME
+	if runtime.GOOS == "windows" {
+		kubeconfig = strings.ReplaceAll(kubeconfig, "$HOME", "$HOMEPATH")
+	}
+
+	// ExpandEnv is required to for Windows users
+	kubeconfig = os.Expand(kubeconfig, os.Getenv)
 
 	if len(file) == 0 {
 		if stat, err := os.Stat("./job.yaml"); err != nil {
