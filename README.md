@@ -32,6 +32,12 @@ name: checker
 image: ghcr.io/openfaas/config-checker:latest
 namespace: openfaas
 sa: openfaas-checker
+# optionally specify resource requests/limits
+# requests:
+#   cpu: 1000m
+# limits:
+#   cpu: 2000m
+#   nvidia.com/gpu: 1
 ```
 
 Download run-job from [the releases page](https://github.com/alexellis/run-job/releases), or use arkade:
@@ -47,6 +53,7 @@ $ run-job \
     -f job.yaml \
     -out report.txt
 ```
+
 
 ### Example 2 - kubectl with RBAC
 
