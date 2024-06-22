@@ -15,6 +15,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	resource "k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/google/uuid"
 	batchv1 "k8s.io/api/batch/v1"
@@ -39,12 +40,31 @@ var (
 )
 
 type Job struct {
-	JobName        string   `yaml:"name"`
-	Image          string   `yaml:"image"`
-	Namespace      string   `yaml:"namespace,omitempty"`
-	ServiceAccount string   `yaml:"service_account,omitempty"`
-	Command        []string `yaml:"command,omitempty"`
-	Args           []string `yaml:"args,omitempty"`
+	JobName        string            `yaml:"name"`
+	Image          string            `yaml:"image"`
+	Namespace      string            `yaml:"namespace,omitempty"`
+	ServiceAccount string            `yaml:"service_account,omitempty"`
+	Command        []string          `yaml:"command,omitempty"`
+	Args           []string          `yaml:"args,omitempty"`
+	Limits         map[string]string `yaml:"limits,omitempty"`
+	Requests       map[string]string `yaml:"requests,omitempty"`
+}
+
+func makeResourceList(inputMap map[string]string) corev1.ResourceList {
+	// Create a new ResourceList
+	resourceList := corev1.ResourceList{}
+
+	// Iterate through the input map and populate the ResourceList
+	for key, value := range inputMap {
+		quantity, err := resource.ParseQuantity(value)
+		if err != nil {
+			fmt.Printf("Error converting value for key %s: %v\n", key, err)
+			continue
+		}
+		resourceList[corev1.ResourceName(key)] = quantity
+	}
+
+	return resourceList
 }
 
 func main() {
@@ -100,6 +120,8 @@ func main() {
 	sa := jobFile.ServiceAccount
 	command := jobFile.Command
 	args := jobFile.Args
+	requests := jobFile.Requests
+	limits := jobFile.Limits
 
 	if len(namespace) == 0 {
 		namespace = "default"
@@ -163,6 +185,10 @@ func main() {
 							ImagePullPolicy: corev1.PullAlways,
 							Command:         command,
 							Args:            args,
+							Resources: corev1.ResourceRequirements{
+								Requests: makeResourceList(requests),
+								Limits:   makeResourceList(limits),
+							},
 						},
 					},
 				},
