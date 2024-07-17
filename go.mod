@@ -1,14 +1,14 @@
 module github.com/alexellis/run-job
 
 go 1.21
-toolchain go1.22.3
+toolchain go1.22.5
 
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/google/uuid v1.6.0
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.30.2
-	k8s.io/apimachinery v0.30.2
+	k8s.io/api v0.30.3
+	k8s.io/apimachinery v0.30.3
 	k8s.io/client-go v0.30.2
 )
 
